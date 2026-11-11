@@ -58,7 +58,7 @@ export default function App() {
         const mensagens = {
           401: "Sessão inválida ou token rejeitado. Saia e entre novamente.",
           403: "Seu usuário não tem permissão para esta ação.",
-          404: "Publicação não encontrada. Atualize a lista.",
+          404: "artigo não encontrada. Atualize a lista.",
           502: "A API está inacessível. Confira o container e a porta 8081.",
           503: "A API está indisponível.",
           504: "O servidor demorou para responder.",
@@ -117,7 +117,7 @@ export default function App() {
     setMensagem(null);
     try {
       await chamar(editando === null ? "POST" : "PUT", editando === null ? "" : `/${editando}`, form);
-      setMensagem({ tipo: "ok", texto: editando === null ? "Publicação criada." : "Publicação atualizada." });
+      setMensagem({ tipo: "ok", texto: editando === null ? "artigo criada." : "artigo atualizada." });
       setForm(VAZIO); setEditando(null); setRevisao(v => v + 1);
     } catch (error) { setMensagem({ tipo: "erro", texto: error.message }); }
     finally { setSalvando(false); }
@@ -136,28 +136,28 @@ export default function App() {
     try {
       await chamar("DELETE", `/${item.id}`);
       if (editando === item.id) { setEditando(null); setForm(VAZIO); }
-      setMensagem({ tipo: "ok", texto: "Publicação excluída." }); setRevisao(v => v + 1);
+      setMensagem({ tipo: "ok", texto: "artigo excluída." }); setRevisao(v => v + 1);
     } catch (error) { setMensagem({ tipo: "erro", texto: error.message }); }
     finally { setExcluindo(null); }
   }
 
   if (isLoading) return <main className="estado">Carregando autenticação…</main>;
   if (erroAuth) return <main className="estado"><h1>Não foi possível entrar</h1><p role="alert">{erroAuth.message}</p><button onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}>Voltar ao início</button></main>;
-  if (!isAuthenticated) return <main className="entrada"><span className="marca">BASE / PROVA</span><h1>Publique ideias.<br/>Consulte conteúdos.</h1><p>Uma base simples para criar, organizar e visualizar publicações com acesso por perfil.</p><button onClick={() => loginWithRedirect()}>Entrar com minha conta</button><small>Autenticação com Auth0 · API Spring Boot</small></main>;
+  if (!isAuthenticated) return <main className="entrada"><span className="marca">/ PROVA</span><h1>Publique ideias.<br/>Consulte conteúdos.</h1><p>Uma base simples para criar, organizar e visualizar Artigos com acesso por perfil.</p><button onClick={() => loginWithRedirect()}>Entrar com minha conta</button><small>Autenticação com Auth0 · API Spring Boot</small></main>;
 
   return <div className="layout">
-    <header className="topo"><div><span className="marca">BASE / PROVA</span><h1>Publicações</h1></div><div className="conta"><span>{user?.email || user?.name}</span><span className="perfil">{permissoes === null ? "Verificando acesso…" : podeEscrever ? "Gerenciamento" : "Consulta"}</span><button className="secundario" onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}>Sair</button></div></header>
+    <header className="topo"><div><span className="marca"> / PROVA</span><h1>Artigos</h1></div><div className="conta"><span>{user?.email || user?.name}</span><span className="perfil">{permissoes === null ? "Verificando acesso…" : podeEscrever ? "Gerenciamento" : "Consulta"}</span><button className="secundario" onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}>Sair</button></div></header>
     {mensagem && <div role="status" className={`aviso ${mensagem.tipo}`}>{mensagem.texto}</div>}
     {permissoes !== null && !permissoes.includes(config.readPermission) && <div className="aviso erro">Seu token não contém {config.readPermission}. Confira as permissões do papel na API correta do Auth0 e entre novamente.</div>}
     <div className={podeEscrever ? "colunas" : "colunas consulta"}>
-      {podeEscrever && <aside id="editor" className="painel editor"><h2>{editando === null ? "Nova publicação" : `Editar publicação #${editando}`}</h2><p className="muted">Título, conteúdo e categoria são os campos da base.</p>
+      {podeEscrever && <aside id="editor" className="painel editor"><h2>{editando === null ? "Novo artigo" : `Editar artigo #${editando}`}</h2><p className="muted">Título, conteúdo e categoria são os campos da base.</p>
         <form onSubmit={salvar}><fieldset disabled={salvando || excluindo !== null}>
           <label htmlFor="titulo">Título</label><input id="titulo" required maxLength={160} value={form.titulo} onChange={e => setForm({ ...form, titulo: e.target.value })}/>
           <label htmlFor="conteudo">Conteúdo</label><textarea id="conteudo" required maxLength={5000} rows={7} value={form.conteudo} onChange={e => setForm({ ...form, conteudo: e.target.value })}/>
           <label htmlFor="categoria">Categoria</label><input id="categoria" required maxLength={80} placeholder="Ex.: Geral" value={form.categoria} onChange={e => setForm({ ...form, categoria: e.target.value })}/>
           <div className="acoes"><button type="submit">{salvando ? "Salvando…" : editando === null ? "Publicar" : "Salvar alterações"}</button>{editando !== null && <button type="button" className="secundario" onClick={() => { setEditando(null); setForm(VAZIO); }}>Cancelar</button>}</div>
         </fieldset></form></aside>}
-      <section className="listagem"><div className="cabecalho-lista"><div><h2>Conteúdos publicados</h2><p className="muted">{dados.totalElements} {dados.totalElements === 1 ? "publicação" : "publicações"}</p></div><button className="secundario" disabled={carregando} onClick={() => setRevisao(v => v + 1)}>Atualizar</button></div>
+      <section className="listagem"><div className="cabecalho-lista"><div><h2>Conteúdos publicados</h2><p className="muted">{dados.totalElements} {dados.totalElements === 1 ? "artigo" : "Artigos"}</p></div><button className="secundario" disabled={carregando} onClick={() => setRevisao(v => v + 1)}>Atualizar</button></div>
         <form className="painel filtros" onSubmit={e => { e.preventDefault(); setPagina(0); setAplicados({ ...filtros }); }}>
           <div><label htmlFor="busca">Buscar no título ou conteúdo</label><input id="busca" maxLength={160} placeholder="Digite um termo" value={filtros.busca} onChange={e => setFiltros({ ...filtros, busca: e.target.value })}/></div>
           <div><label htmlFor="filtroCategoria">Categoria exata</label><input id="filtroCategoria" maxLength={80} placeholder="Todas" value={filtros.categoria} onChange={e => setFiltros({ ...filtros, categoria: e.target.value })}/></div>
@@ -165,7 +165,7 @@ export default function App() {
           <div className="acoes"><button type="submit">Filtrar</button><button type="button" className="secundario" onClick={() => { setFiltros({ ...FILTROS }); setAplicados({ ...FILTROS }); setPagina(0); }}>Limpar</button></div>
         </form>
         {erroLista && <div role="alert" className="aviso erro">{erroLista}</div>}
-        {carregando ? <div role="status" className="vazio">Carregando publicações…</div> : !erroLista && dados.content.length === 0 ? <div className="painel vazio"><h3>Nenhuma publicação encontrada</h3><p>{podeEscrever ? "Crie uma publicação ou ajuste os filtros." : "Ajuste os filtros ou aguarde novas publicações."}</p></div> : !erroLista && <div className="cards">{dados.content.map(item => <article className="painel card" key={item.id}><span className="categoria">{item.categoria}</span><h3>{item.titulo}</h3><p className="conteudo">{item.conteudo}</p><footer><small>Criado em {formatarData(item.criadoEm)}<br/>Atualizado em {formatarData(item.atualizadoEm)}</small>{podeEscrever && <div className="acoes"><button className="secundario" disabled={salvando || excluindo !== null} onClick={() => editar(item)}>Editar</button><button className="perigo" disabled={salvando || excluindo !== null} onClick={() => excluir(item)}>{excluindo === item.id ? "Excluindo…" : "Excluir"}</button></div>}</footer></article>)}</div>}
+        {carregando ? <div role="status" className="vazio">Carregando Artigos…</div> : !erroLista && dados.content.length === 0 ? <div className="painel vazio"><h3>Nenhuma artigo encontrada</h3><p>{podeEscrever ? "Crie uma artigo ou ajuste os filtros." : "Ajuste os filtros ou aguarde novas Artigos."}</p></div> : !erroLista && <div className="cards">{dados.content.map(item => <article className="painel card" key={item.id}><span className="categoria">{item.categoria}</span><h3>{item.titulo}</h3><p className="conteudo">{item.conteudo}</p><footer><small>Criado em {formatarData(item.criadoEm)}<br/>Atualizado em {formatarData(item.atualizadoEm)}</small>{podeEscrever && <div className="acoes"><button className="secundario" disabled={salvando || excluindo !== null} onClick={() => editar(item)}>Editar</button><button className="perigo" disabled={salvando || excluindo !== null} onClick={() => excluir(item)}>{excluindo === item.id ? "Excluindo…" : "Excluir"}</button></div>}</footer></article>)}</div>}
         {!erroLista && dados.totalPages > 0 && <nav className="paginacao" aria-label="Paginação"><button className="secundario" disabled={pagina === 0 || carregando} onClick={() => setPagina(v => v - 1)}>Anterior</button><span>Página {pagina + 1} de {dados.totalPages}</span><button className="secundario" disabled={pagina + 1 >= dados.totalPages || carregando} onClick={() => setPagina(v => v + 1)}>Próxima</button></nav>}
       </section>
     </div><footer className="rodape">Base adaptável · autorização aplicada pela API · dados persistidos no PostgreSQL</footer>
